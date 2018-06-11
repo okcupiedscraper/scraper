@@ -16,8 +16,8 @@ def login():
     driver.get("https://okcupid.com")  # opens up chrome - okcupid
     agent = driver.execute_script("return navigator.userAgent")
     print(agent)
-    user_name = "evich_blah@mail.com"  # give username
-    password = "1234567890As!"  # give password
+    user_name = ""  # give username
+    password = ""  # give password
     time.sleep(5)
     button = driver.find_element_by_xpath('//*[@id="root"]/span/div/div[1]/div[1]/div[2]/button')
     button.click()
