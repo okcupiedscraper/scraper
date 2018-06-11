@@ -61,3 +61,4 @@ def inf_scroll():
 
 login() #opens up browser and logins
 inf_scroll() #scrapes the results of every person set in each city
+driver.quit()
