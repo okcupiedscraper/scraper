@@ -1,0 +1,99 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+#from selenium.common.exceptions import NoSuchElementException
+from bs4 import BeautifulSoup
+import time
+import csv
+import ast
+
+opts = Options()
+opts.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36")
+
+driver = webdriver.Chrome("", chrome_options=opts)
+
+
+def login():
+    driver.get("https://okcupid.com")  # opens up chrome - okcupid
+    agent = driver.execute_script("return navigator.userAgent")
+    print(agent)
+    user_name = "evich_blah@mail.com"  # give username
+    password = "1234567890As!"  # give password
+    time.sleep(5)
+    button = driver.find_element_by_xpath('//*[@id="root"]/span/div/div[1]/div[1]/div[2]/button')
+    button.click()
+    time.sleep(5)
+    driver.find_element_by_xpath('//*[@id="root"]/span/div/div[2]/span/div/form/div[2]/div[1]/span[2]/input').send_keys(
+        user_name)
+    driver.find_element_by_xpath('//*[@id="root"]/span/div/div[2]/span/div/form/div[2]/div[2]/span[2]/input').send_keys(
+        password)
+    driver.find_element_by_xpath('//*[@id="root"]/span/div/div[2]/span/div/form/div[3]/input').click()
+
+    time.sleep(5)
+    
+def scrape():
+    with open('profile_urls.csv', 'r') as userfile:
+        userfilereader = csv.reader(userfile)
+        for col in userfilereader:
+            userlist.append(col)
+
+    actual_list = ast.literal_eval(str(userlist[0]))
+    print(len(actual_list))
+    actual_list = list(set(actual_list))
+    print(len(actual_list))
+    userfile.close()
+
+
+    for user in actual_list:
+        driver.get("https://okcupid.com"+user)
+        time.sleep(3)
+        html = driver.page_source
+
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        see_questions = 0
+            try:
+                qsoup = soup.find('div', {"class": "qgenres2015-more"})
+                href1 = qsoup.find('a').get('href')
+                see_questions = "https://www.okcupid.com" + str(href1)
+            except NoSuchElementException:
+                pass
+
+            if (see_questions != 0) and (see_questions is not None):
+                driver.get(see_questions)
+                time.sleep(3)
+
+                page_num = 11
+
+                while True:
+
+                    stop = None
+                    time.sleep(3)
+                    html = driver.page_source
+                    soup = BeautifulSoup(html, 'html.parser')
+                    try:
+                        stop = soup.find('div', {'class': 'blank_state no_results no_buttons'})
+                        stop = stop.find('h2').text
+                    except:
+                        pass
+                    print('!!--New page--!!')
+                    if stop == "Nothing to see here yet":
+                        break
+                    else:
+                        foobar = soup.find('div', {"class": 'pages_content'})
+                        foobar = foobar.find_all('div', {'class': 'question public clearfix initialized'})
+                        for fb in foobar:
+                            answer1231 = fb.find('p', {'class': 'answer clearfix target'}).text
+                            fb = fb.find('div', {'class': 'qtext'})
+                            question1234 = fb.find('p').text
+                            un_answer1234 = None
+                            print(question1234)
+                            print(answer1231)
+                    driver.get(see_questions + "?low=" + str(page_num))
+                    page_num = page_num + 10
+        
+    
+login()
+userlist = []
+scrape()
+
+driver.quit()
